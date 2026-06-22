@@ -16,7 +16,7 @@ class MedicalRAGPipeline:
             self.embeddings = OllamaEmbeddings(
                 model=Config.EMBEDDING_MODEL,
                 base_url=Config.OLLAMA_BASE_URL
-            )
+            ) 
             
             # Initialize LLM client
             self.llm = ChatOllama(
@@ -30,7 +30,7 @@ class MedicalRAGPipeline:
             logger.error(f"Failed to initialize MedicalRAGPipeline: {str(e)}")
             raise e
             
-    def retrieve(self, query: str, top_k: int = 3):
+    def retrieve(self, query: str, top_k: int = 2):
         """Retrieve top matching chunks from Pinecone."""
         try:
             # Generate query embedding vector
