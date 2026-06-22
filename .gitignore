@@ -1,0 +1,38 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Environments and Secrets
+.env
+.env.*
+!.env.example
+venv/
+ENV/
+env/
+.venv/
+
+# Node / Frontend
+node_modules/
+.next/
+out/
+build/
+dist/
+*.tsbuildinfo
+next-env.d.ts
+
+# Logs and databases
+*.log
+medbot/backend/logs/
+medbot/backend/data/
+
+# OS / IDEs
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.swp
