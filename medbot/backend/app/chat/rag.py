@@ -22,7 +22,8 @@ class MedicalRAGPipeline:
             self.llm = ChatOllama(
                 model=Config.LLM_MODEL,
                 base_url=Config.OLLAMA_BASE_URL,
-                temperature=0.2
+                temperature=0.2,
+                num_ctx=2048
             )
             logger.info("MedicalRAGPipeline initialized successfully.")
         except Exception as e:
