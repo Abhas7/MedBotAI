@@ -19,12 +19,17 @@ class MedicalRAGPipeline:
             ) 
             
             # Initialize LLM client
-            self.llm = ChatOllama(
-                model=Config.LLM_MODEL,
-                base_url=Config.OLLAMA_BASE_URL,
-                temperature=0.2,
-                num_ctx=2048
-            )
+            llm_kwargs = {
+                "model": Config.LLM_MODEL,
+                "base_url": Config.OLLAMA_BASE_URL,
+                "temperature": 0.2,
+                "num_ctx": 2048,
+                "num_predict": Config.LLM_NUM_PREDICT
+            }
+            if Config.LLM_NUM_THREAD is not None:
+                llm_kwargs["num_thread"] = Config.LLM_NUM_THREAD
+                
+            self.llm = ChatOllama(**llm_kwargs)
             logger.info("MedicalRAGPipeline initialized successfully.")
         except Exception as e:
             logger.error(f"Failed to initialize MedicalRAGPipeline: {str(e)}")
@@ -53,7 +58,7 @@ class MedicalRAGPipeline:
         
         # Hallucination Guard threshold
         # If no matches or the highest similarity score is too low, bypass LLM
-        threshold = 0.35
+        threshold = 0.55
         if not matches or matches[0].get("score", 0.0) < threshold:
             response_text = "I don't know based on the available medical data."
             if stream:

@@ -8,6 +8,14 @@ from app.chat.rag import MedicalRAGPipeline
 
 logger = logging.getLogger(__name__)
 
+_rag_pipeline = None
+
+def get_rag_pipeline():
+    global _rag_pipeline
+    if _rag_pipeline is None:
+        _rag_pipeline = MedicalRAGPipeline()
+    return _rag_pipeline
+
 @chat_bp.route("/sessions", methods=["POST"])
 @token_required
 def create_session(current_user_id):
@@ -106,7 +114,7 @@ def chat(current_user_id):
                 yield f"data: {json.dumps({'status': 'connected'})}\n\n"
                 
                 # Initialize pipeline and generate response AFTER sending headers and initial connection packet
-                pipeline = MedicalRAGPipeline()
+                pipeline = get_rag_pipeline()
                 stream, sources = pipeline.generate_response(query, stream=True)
                 
                 for token in stream:
