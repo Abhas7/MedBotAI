@@ -1,7 +1,8 @@
 import logging
 from pinecone import Pinecone
 from app.config import Config
-from langchain_ollama import OllamaEmbeddings, ChatOllama
+from langchain_ollama import ChatOllama
+from fastembed import TextEmbedding
 
 logger = logging.getLogger(__name__)
 
@@ -12,18 +13,14 @@ class MedicalRAGPipeline:
             self.pc = Pinecone(api_key=Config.PINECONE_API_KEY)
             self.index = self.pc.Index(Config.PINECONE_INDEX_NAME)
             
-            # Initialize Embeddings client
-            self.embeddings = OllamaEmbeddings(
-                model=Config.EMBEDDING_MODEL,
-                base_url=Config.OLLAMA_BASE_URL
-            ) 
-            
-            # Initialize LLM client
+            # Initialize Embeddings client using fastembed for 0-latency local ONNX execution
+            self.embeddings = TextEmbedding(model_name="nomic-ai/nomic-embed-text-v1.5")
+              
             llm_kwargs = {
                 "model": Config.LLM_MODEL,
                 "base_url": Config.OLLAMA_BASE_URL,
                 "temperature": 0.2,
-                "num_ctx": 2048,
+                "num_ctx": 4096,
                 "num_predict": Config.LLM_NUM_PREDICT
             }
             if Config.LLM_NUM_THREAD is not None:
@@ -35,11 +32,12 @@ class MedicalRAGPipeline:
             logger.error(f"Failed to initialize MedicalRAGPipeline: {str(e)}")
             raise e
             
-    def retrieve(self, query: str, top_k: int = 2):
+    def retrieve(self, query: str, top_k: int = 3):
         """Retrieve top matching chunks from Pinecone."""
         try:
-            # Generate query embedding vector
-            query_vector = self.embeddings.embed_query(query)
+            # Generate query embedding vector using fastembed (ONNX)
+            embeddings_generator = self.embeddings.embed([query])
+            query_vector = [float(x) for x in list(embeddings_generator)[0]]
             
             # Query Pinecone index
             results = self.index.query(

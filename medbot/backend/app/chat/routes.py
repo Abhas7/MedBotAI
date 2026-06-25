@@ -73,7 +73,11 @@ def delete_session(current_user_id, session_id):
     try:
         # Verify ownership
         session = SupabaseDB.get_session_by_id(session_id)
-        if not session or session["user_id"] != current_user_id:
+        if not session:
+            # Idempotent delete: if the session is already gone, return success
+            return jsonify({"message": "Session deleted successfully."}), 200
+            
+        if session["user_id"] != current_user_id:
             return jsonify({"message": "Session not found or access denied."}), 403
             
         deleted = SupabaseDB.delete_session(session_id)
